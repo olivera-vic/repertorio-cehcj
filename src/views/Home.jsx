@@ -14,12 +14,13 @@ function Home() {
   async function cargarCanciones() {
   const { data, error } = await supabase
     .from("songs")
-    .select("*");
+    .select("*")
+    .order("titulo", { ascending: true });
 
-  console.log("DATA:", data);
-  console.log("ERROR:", error);
-
-  if (error) return;
+  if (error) {
+    console.log(error);
+    return;
+  }
 
   setCanciones(data);
 }
