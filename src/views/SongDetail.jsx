@@ -1,6 +1,6 @@
 import { useEffect, useState } from "react";
 import { useParams } from "react-router-dom";
-import { supabase } from "../services/supabase";
+import { getSong } from "../services/database";
 import ChordLyrics from "../components/ChordLyrics";
 import { transponerAcorde } from "../utils/transpose";
 
@@ -12,18 +12,17 @@ function SongDetail() {
   const [transposicion, setTransposicion] = useState(0);
 
   useEffect(() => {
+    // Al abrir una canción, comenzar siempre desde arriba
+    window.scrollTo(0, 0);
+
     cargarCancion();
   }, [id]);
 
   async function cargarCancion() {
-    const { data, error } = await supabase
-      .from("songs")
-      .select("*")
-      .eq("id", id)
-      .single();
+    const data = await getSong(id);
 
-    if (error) {
-      console.log(error);
+    if (!data) {
+      console.log("Canción no encontrada");
       return;
     }
 
@@ -35,9 +34,7 @@ function SongDetail() {
   function cambiarTono(pasos) {
     setTransposicion((actual) => actual + pasos);
 
-    setTono((actual) =>
-      transponerAcorde(actual, pasos)
-    );
+    setTono((actual) => transponerAcorde(actual, pasos));
   }
 
   if (!song) {

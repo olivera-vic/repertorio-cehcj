@@ -1,7 +1,7 @@
 import { useEffect, useState } from "react";
 import SongCard from "../components/SongCard";
 import SearchBar from "../components/SearchBar";
-import { supabase } from "../services/supabase";
+import { sincronizarCanciones } from "../services/sync";
 
 function Home() {
   const [canciones, setCanciones] = useState([]);
@@ -12,18 +12,12 @@ function Home() {
   }, []);
 
   async function cargarCanciones() {
-  const { data, error } = await supabase
-    .from("songs")
-    .select("*")
-    .order("titulo", { ascending: true });
+    const data = await sincronizarCanciones();
 
-  if (error) {
-    console.log(error);
-    return;
+    data.sort((a, b) => a.titulo.localeCompare(b.titulo));
+
+    setCanciones(data);
   }
-
-  setCanciones(data);
-}
 
   const cancionesFiltradas = canciones.filter((cancion) =>
     cancion.titulo.toLowerCase().includes(busqueda.toLowerCase())
@@ -38,7 +32,7 @@ function Home() {
           fontWeight: "700",
         }}
       >
-        Canciones
+        Canciones ({canciones.length})
       </h2>
 
       <SearchBar
